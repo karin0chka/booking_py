@@ -1,0 +1,115 @@
+{% extends 'main/base.html' %}
+{% block title %}Home Page{% endblock %} 
+{% block content %}
+<div class="book_ticked">
+  <form class="form-wrapper" id="toFill" method="POST">
+    {% csrf_token %}
+    <section class="form">
+      <div class="from">
+        <label for="form1">From<span aria-label="required">*</span></label>
+        <br />
+        <input
+          class="input"
+          name="from_location"
+          required
+          id="form1"
+          list="list1"
+          type="text"
+          aria-describedby="from"
+          placeholder="Where from?"
+        />
+      </div>
+
+      <div class="destination">
+        <label for="form2"
+          >Your Destination<span aria-label="required">*</span></label
+        >
+        <br />
+        <input
+          class="input"
+          name="destination"
+          required
+          id="form2"
+          list="list2"
+          type="text"
+          aria-describedby="destinationName"
+          placeholder="Where to?"
+        />
+      </div>
+
+      <div>
+        <label for="day-in">Check In</label>
+        <br />
+        <input required id="day-in" type="date" class="input" min="{{today}}" name="depart_date" />
+      </div>
+
+      <div>
+        <label>Number of people</label>
+        <br />
+        <input required type="number" min="1" class="input" name="quantity" />
+      </div>
+      <div>
+        <label for="tickets">Type of ticket:</label>
+        <br />
+        <select name="ticket_type" class="input">
+          <option value="economy">Economy</option>
+          <option value="first_class">First class</option>
+          <option value="business_class">Business class</option>
+        </select>
+      </div>
+    </section>
+
+    <div class="seeTicket">
+      <br />
+      <button type="submit" id="submitForm">See remaining tickets</button>
+    </div>
+  </form>
+</div>
+<style>
+    .home_page {
+      float: right;
+      margin: 15px;
+    }
+    .book_ticked {
+      display: flex;
+      justify-content: center;
+      margin: auto;
+    }
+    .input {
+      height: 35px;
+      border-radius: 5px;
+      border: 1px solid grey;
+      width: 100%;
+    }
+
+    .form {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    .form-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      border: 1px solid black;
+      border-radius: 10px;
+      background-color: aliceblue;
+      opacity: 0.8;
+    }
+    @media screen and (max-width: 900px) and (min-width: 600px) {
+      .form {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media screen and (max-width: 599px) {
+      .form {
+        grid-template-columns: 1fr;
+      }
+    }
+    .pick-ticket {
+      display: none;
+      margin-top: 10px;
+    }
+</style>
+{% endblock %}

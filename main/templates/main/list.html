@@ -1,0 +1,161 @@
+{% extends 'main/base.html' %} 
+{% load custom_filters %}
+{% block content %} 
+{% if allowances %}
+<section class="ticket_result">
+  <h1>Search Results</h1>
+
+  {% for allowance in allowances%}
+  <div class="ticket_wrapper">
+    <div class="ticket_info">
+      <div class="ticket_section">
+        <h5><strong>From: </strong>{{allowance.from_location}}</h5>
+        <h5><strong>Destination: </strong> {{allowance.destination}}</h5>
+      </div>
+      <div class="ticket_section">
+        <h5><strong>Depart day: </strong>{{allowance.depart_date}}</h5>
+        <h5><strong>Arrival day: </strong> {{allowance.arriving_date}}</h5>
+      </div>
+      <div class="ticket_section">
+        <h5><strong>Ticket type: </strong> {{type}}</h5>
+        <h5>
+          <strong>Available seats: </strong>
+          {% if type == 'economy' %} 
+          {{allowance.economy_seats}} 
+          {% elif type == 'first_class' %} 
+          {{allowance.first_class_seats}} 
+          {% else %}
+          {{allowance.business_class_seats}} 
+          {% endif %}
+        </h5>
+      </div>
+      <div class="price_button" onclick="showConfirmButtons()">
+        <h3>
+          £ 
+        {% if type == 'economy' %}
+              {{allowance.economy_seat_price|multiply:quantity}}
+        {% elif type == 'first_class' %} 
+              {{allowance.first_class_seat_price|multiply:quantity}} 
+        {% else %} 
+              {{allowance.business_class_seat_price|multiply:quantity}}
+         {% endif %}
+        </h3>
+        <h2>Buy</h2>
+      </div>
+    </div>
+    <div class="ticket_booking" id="confirm">
+      <div>
+            <button class="book_ticket" data-ticket-type="{{type}}" data-quantity="{{quantity}}" data-allowance-id="{{allowance.id}}" onclick="bookTicket(this)">Book ticket</button>
+      </div>
+      <div>
+            <button class="return_ticket">Сancel booking</button>
+      </div>
+    </div>
+  </div>
+  {% endfor %} 
+  {% else %}
+  <p>Your destination is not found.</p>
+  {% endif%}
+</section>
+<style>
+  .ticket_result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 1200px;
+    width: 100%;
+    padding: 15px;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: aliceblue;
+    opacity: 0.8;
+  }
+  .ticket_wrapper {
+    background-color: rgb(160, 201, 187);
+    border: 1px solid rgb(43, 42, 42);
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .ticket_info {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 100px;
+    gap: 10px;
+    padding-left: 15px;
+  }
+  .price_button {
+    background-color: yellow;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 0px 0px 0px 30px ;
+  }
+  .ticket_section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-transform: capitalize;
+  }
+  .ticket_booking{
+    display: none;
+    width: 50%;
+    margin: 0 auto;
+  }
+  
+  .book_ticket{ 
+    float: right;
+    background-color: rgb(40, 125, 40);
+    margin: 10px;
+  }
+  .return_ticket{
+    float: left;
+    background-color: rgb(175, 24, 24);
+    margin: 10px;
+  }
+  @media (max-width: 769px){
+    .book_ticket, .return_ticket{
+        float: none;
+    }
+}
+</style>
+<script>
+    function showConfirmButtons(){
+        document.getElementById('confirm').style.display = "block";
+    }
+
+
+
+    function bookTicket(e) {
+    const allowance_id = Number(e.getAttribute("data-allowance-id"));
+    const quantity = Number(e.getAttribute("data-quantity"));
+    const ticket_type=e.getAttribute("data-ticket-type");
+    if (typeof allowance_id !== "number") return;
+
+
+    const dto = {
+      allowance_id:allowance_id, 
+      quantity:quantity, 
+      ticket_type:ticket_type
+    };
+
+    fetch("/ticket/new", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      body: JSON.stringify(dto),
+    }).then(res =>res.json())
+    .then((res) => {
+     if(res.url){
+      window.location.href = res.url
+     }  
+ });
+  }
+</script>
+
+{% endblock%}

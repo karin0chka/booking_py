@@ -1,0 +1,224 @@
+{% extends 'main/base.html' %} 
+{% block title %}Home{% endblock %} 
+{% block content %} 
+
+
+{% if error %}
+<h2 style="color: tomato">{{error}}</h2>
+{% else %}
+<main class="confirmation">
+  <h1>Booking Confirmed</h1>
+  <section class="booking_inform">
+    <div class="info">
+      <h5><strong>Booking ID: </strong>{{ticket.booking_id}}</h5>
+    </div>
+    <div class="info">
+      <h5><strong>Depart day: </strong>{{ticket.depart_date }}</h5>
+    </div>
+    <div class="info">
+      <h5><strong>Arrival day: </strong>{{ticket.arriving_date}}</h5>
+    </div>
+    <div class="info">
+      <form>
+        <input type="checkbox" id="apply" />
+        <label for="apply">Apply 40% discount</label>
+      </form>
+    </div>
+  </section>
+  <section class="choice">
+    <h4>Total price with discount: £{{ticket.total_price}}</h4>
+    {% if ticket.canceled_by%}
+    <h4>Canceled by: {{ticket.canceled_by}}</h4>
+    {% else %}
+    <button class="cancel_button" onclick="cancelBooking()">
+      Сancel booking
+    </button>
+    {% endif %}
+  </section>
+  <section class="feedback_wrapper">
+    <form method="POST" action="/feedback/{{ticket.booking_id}}/" class="feedback">
+      {% csrf_token %}
+      <h3>Please leave your feedback</h3>
+      <label for="title">Title: </label>
+      <br />
+      <input
+        type="text"
+        id="title"
+        name="title"
+        placeholder="Label your feedback "
+        class="input"
+      />
+      <br />
+      <label for="email">Email: </label>
+      <br />
+      <input
+        type="email"
+        id="email"
+        name="email"
+        placeholder="Please write your email"
+        class="input"
+      />
+      <label for="description">Description: </label>
+      <br />
+      <textarea
+        id="description"
+        row="3"
+        name="description"
+        style="width: 100%"
+        class="input feedback_input"
+        placeholder="Please write your feedback here"
+      ></textarea>
+      <br />
+
+      <button type="submit" class="submit">Submit</button>
+    </form>
+    <div class="feedback ">
+        <h3>All feedbacks</h3>
+        <ul class="feed_wrapper">
+            {% for feed in feedback %}
+            <li>
+                <div>
+                    <strong>
+                        {% if feed.email %}
+                        Client
+                        {% else %} 
+                        Admin:
+                        {% endif %}
+                    </strong>
+                    <strong>: {{feed.title}}</strong>
+                    <small style="margin-left: auto;">{{feed.created_at}}</small>
+                </div>
+                {{feed.description}}
+            </li>
+            {% endfor %}
+
+        </ul>
+    </div>
+  </section>
+</main>
+{% endif %}
+<style>
+  .confirmation {
+    display: block;
+    margin: 0 auto;
+    margin-top: 150px;
+    max-width: 1200px;
+    width: 100%;
+    padding: 15px;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: aliceblue;
+  }
+  .booking_inform {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 5px;
+  }
+  .info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-transform: capitalize;
+  }
+  .feedback {
+    padding: 10px;
+    background-color: rgb(160, 201, 187);
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 0 10px grey;
+  }
+  .feedback_wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .feed_wrapper {
+    height: 200px;
+    overflow-y: auto;
+  }
+  .feed_wrapper li {
+    margin-top: 5px;
+    border-bottom: 1px solid rgb(42, 42, 42);
+  }
+  .feed_wrapper li div{
+    display: flex;
+  }
+  .price {
+    text-align: center;
+    float: left;
+  }
+  h1 {
+    text-align: center;
+  }
+  h3 {
+    text-align: center;
+  }
+  h5 {
+    font-size: large;
+  }
+  .details {
+    margin: 30px 15px;
+  }
+  .submit {
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 10px;
+  }
+  .input {
+    height: 35px;
+    border-radius: 5px;
+    border: 1px solid grey;
+    width: 100%;
+  }
+  label {
+    font-size: large;
+  }
+  .choice {
+    display: flex;
+    justify-content: space-between;
+  }
+  .cancel_button {
+    background-color: white;
+    color: red;
+    box-shadow: none;
+    padding: 5px 25px;
+  }
+  .cancel {
+    color: red;
+    cursor: pointer;
+    text-align: right;
+  }
+
+  @media (max-width: 769px) {
+    .confirmation {
+      margin-top: 100px;
+      width: 75%;
+    }
+    .booking_inform {
+      display: block;
+      text-align: left;
+    }
+
+    .feedback_wrapper {
+      display: block;
+      text-align: center;
+    }
+  }
+</style>
+<script>
+  function cancelBooking() {
+    fetch("/ticket/{{ticket.booking_id}}", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+    }).then((res) => {
+      window.location.href = "ticket/{{ticket.booking_id}}";
+      window.location.reload()
+    });
+  }
+</script>
+{% endblock%}
