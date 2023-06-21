@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import FeedbackForm, TicketSearchForm
-from .models import Allowance, Ticket
+from .models import Allowance, Ticket, Feedback, Discount                   
 from datetime import date
 from django.db.models import Q
-from .models import Feedback
 from .forms import FeedbackForm
 import json
 from django.http import HttpResponse
@@ -75,7 +74,7 @@ def booked_ticket(request, booking_id):
         context = {'ticket': None, 'feedback':[], 'error': None}
         try:
             #Attempt to  retrieve the ticket with the specified booking_id
-            ticket = Ticket.objects.get(booking_id=booking_id)
+            ticket = Ticket.objects.select_related('allowance').get(booking_id=booking_id)
             #Retrieve the feedback associated with the ticket
             feedback = Feedback.objects.filter(ticket_id=ticket.id).order_by('created_at')
             #Update the context with the retrieved ticket and feedback
@@ -173,9 +172,10 @@ def newTicket(request):
                 quantity=quantity,
                 ticket_type=type_value,
                 booking_id=booking_id,
-                total_price=total_price
+                total_price=total_price,
+                discount_applied=False
             )
-            
+
             #Save the Ticket object to the database
             ticket.save()
             #Response JSON object with the URL of the new ticket
@@ -186,7 +186,27 @@ def newTicket(request):
             print('NOPE',is_available)
             return HttpResponse("Not available!")
                 
-             
+def discount(request):
+    try:
+        if request.method=='POST':
+            code = request.POST.get('code')
+            booking_id=request.POST.get('booking_id')
+
+            ticket=Ticket.objects.select_related('allowance').get(booking_id=booking_id,discount_applied=False)
+           
+            discount=Discount.objects.get(code=code, allowance_id=ticket.allowance.id)
+
+            ticket.discount_applied= True
+            ticket.total_price= (ticket.total_price * (100 - discount.value)) / 100
+            ticket.save()
+            return redirect('/ticket/'+ ticket.booking_id)
+        else:
+            return render('main/confirmation.html', {'error':'Invalid request'})              
+
+    except Exception as e:
+        print(e)
+        ticket = Ticket.objects.select_related('allowance').get(booking_id=booking_id)
+        return render(request, 'main/confirmation.html', {'error':'Invalid request','ticket':ticket})              
         
     
     

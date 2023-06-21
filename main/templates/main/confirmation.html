@@ -13,16 +13,22 @@
       <h5><strong>Booking ID: </strong>{{ticket.booking_id}}</h5>
     </div>
     <div class="info">
-      <h5><strong>Depart day: </strong>{{ticket.depart_date }}</h5>
+      <h5><strong>Depart day: </strong>{{ticket.allowance.depart_date }}</h5>
     </div>
     <div class="info">
-      <h5><strong>Arrival day: </strong>{{ticket.arriving_date}}</h5>
+      <h5><strong>Arrival day: </strong>{{ticket.allowance.arriving_date}}</h5>
     </div>
     <div class="info">
-      <form>
-        <input type="checkbox" id="apply" />
-        <label for="apply">Apply 40% discount</label>
+    {% if ticket.discount_applied %}
+    <h5>Discount applied!</h5>
+      {% else %}
+      <form method="POST" action="/discount/" >
+      {% csrf_token %}
+      <input type="hidden" name="booking_id" value="{{ticket.booking_id}}"/>
+        <input type="text" name="code"  id="apply" placeholder="Have a discount code?" required/>
+        <button type="submit"> Add </button>
       </form>
+      {% endif %}
     </div>
   </section>
   <section class="choice">
