@@ -130,7 +130,8 @@ def feedback(request, booking_id):
 
 #handles the creation of new ticket based on the data fron request
 def newTicket(request):
-    #'POST'-user has submitted a form;
+    #'POST'-user has submitted a form;t()
+    print("qwe")
     if request.method=='POST':
         #Retrieve JSON data from the request body;
         json_data = json.loads(request.body)

@@ -29,7 +29,7 @@
           {% endif %}
         </h5>
       </div>
-      <div class="price_button" onclick="showConfirmButtons()">
+      <div class="price_button" data-id="{{allowance.id}}" onclick="showConfirmButtons(this)">
         <h3>
           £ 
         {% if type == 'economy' %}
@@ -43,7 +43,7 @@
         <h2>Buy</h2>
       </div>
     </div>
-    <div class="ticket_booking" id="confirm">
+    <div class="ticket_booking" id="confirm{{allowance.id}}">
       <div>
             <button class="book_ticket" data-ticket-type="{{type}}" data-quantity="{{quantity}}" data-allowance-id="{{allowance.id}}" onclick="bookTicket(this)">Book ticket</button>
       </div>
@@ -71,6 +71,7 @@
     opacity: 0.8;
   }
   .ticket_wrapper {
+    margin-top:10px;
     background-color: rgb(160, 201, 187);
     border: 1px solid rgb(43, 42, 42);
     width: 100%;
@@ -120,11 +121,17 @@
     .book_ticket, .return_ticket{
         float: none;
     }
+    
+}
+.d-block{
+  display:block;
 }
 </style>
 <script>
-    function showConfirmButtons(){
-        document.getElementById('confirm').style.display = "block";
+    function showConfirmButtons(e){
+      
+        const id = Number(e.getAttribute("data-id"));
+        document.getElementById('confirm'+id).classList.toggle("d-block")
     }
 
 
@@ -142,7 +149,7 @@
       ticket_type:ticket_type
     };
 
-    fetch("/ticket/new", {
+    fetch("/newticket/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

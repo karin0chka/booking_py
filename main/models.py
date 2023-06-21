@@ -5,8 +5,8 @@ import datetime
 class Allowance(models.Model):
     from_location = models.CharField(max_length=100)
     destination = models.CharField(max_length=100)
-    depart_date = models.DateField()
-    arriving_date = models.DateField()
+    depart_date = models.DateTimeField()
+    arriving_date = models.DateTimeField()
     economy_seats = models.IntegerField()
     first_class_seats = models.IntegerField()
     business_class_seats = models.IntegerField()
