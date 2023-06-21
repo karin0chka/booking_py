@@ -51,7 +51,6 @@ def home(request):
                 'type':type_value,
                 'allowances':allowances,
                 'form': form,
-                'csrf_token':request.META.get('CSRF_COOKIE',''),
                 'quantity':search_value,
                 
                 
@@ -63,23 +62,17 @@ def home(request):
     # Here we're processing not Post requests(GET request)
     else:
         today= date.today().isoformat()
-        return render(request, 'main/home.html',{'csrf_token':request.META.get('CSRF_COOKIE',''),'today':today})
+        return render(request, 'main/home.html',{'today':today})
 
 #displaying a booked ticket 
 def booked_ticket(request, booking_id):
     #retrieving(Cross-Site-Request Forgery);
     #request.Meta - dictionary that contains all avaible HTTP with request;
     #'CSRE_COOKIE'-represent CSRF token(secret value to prevent CSRF attacks);
-    #in for checks if the key 'CSRE_COOKIE' exists in 'request.META';
-    #if the kay is not present,it sets 'crsf_token' to 'None'
 
-    if('CSRF_COOKIE' in request.META and request.META['CSRF_COOKIE']):
-        crsf_token = request.META['CSRF_COOKIE']
-    else:
-        crsf_token = None
       # if statement for 'GET'method;
     if request.method== "GET":
-        context = {'csrf_token': crsf_token, 'ticket': None, 'feedback':[], 'error': None}
+        context = {'ticket': None, 'feedback':[], 'error': None}
         try:
             #Attempt to  retrieve the ticket with the specified booking_id
             ticket = Ticket.objects.get(booking_id=booking_id)
@@ -176,16 +169,13 @@ def newTicket(request):
 
             # Ticket object with the ticket deteils
             ticket = Ticket(
-                from_location=allowance.from_location,
-                destination=allowance.destination,
-                depart_date=allowance.depart_date,
-                arriving_date=allowance.arriving_date,
+                allowance=allowance,
                 quantity=quantity,
                 ticket_type=type_value,
                 booking_id=booking_id,
                 total_price=total_price
-
             )
+            
             #Save the Ticket object to the database
             ticket.save()
             #Response JSON object with the URL of the new ticket

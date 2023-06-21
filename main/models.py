@@ -38,11 +38,8 @@ class Ticket(models.Model):
         ('client','Client'),
         ('admin','Admin')
     )
-
-    from_location = models.CharField(max_length=100)
-    destination = models.CharField(max_length=100)
-    depart_date = models.DateField()
-    arriving_date = models.DateField()
+    allowance=models.ForeignKey(Allowance, on_delete=models.CASCADE,null=True,blank=True)
+    discount_applied=models.BooleanField(default=False)
     quantity = models.IntegerField()
     ticket_type = models.CharField(max_length=100, choices=TICKET_TYPES)
     canceled_by = models.CharField(max_length=100, choices=CANCELED_BY)
@@ -62,6 +59,15 @@ class Feedback(models.Model):
     created_at = models.DateTimeField(default=datetime.date.today)
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
+
+class Discount(models.Model):
+    value=models.IntegerField()
+    code=models.CharField(max_length=100)
+    allowance=models.ForeignKey(Allowance, on_delete=models.CASCADE,null=True,blank=True)
+    created_at = models.DateTimeField(default=datetime.date.today)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
 
 # class User(models.Model):
 #     first_name = models.CharField(max_length=50)
