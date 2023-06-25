@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from .utils import check_if_admin, return_allowances, get_tickets_with_feedbacks_and_allowance, generate_ticket_report
 from django .db import connection
 from datetime import datetime
+import json
 
 
 def login_view(request):
@@ -105,10 +106,20 @@ def new_admin_feedback(request):
         return redirect('custom_admin')
     
 
-def return_csv_report(request):
+def return_ticket_csv_report(request):
     check_if_admin(request)
-    report_csv = generate_ticket_report()     
+    report_df = generate_ticket_report() 
+
+    created_at= datetime.now()
+    json_str = json.dumps(report_df.to_dict(orient='records'))
+    with connection.cursor() as cursor:
+        cursor.execute(
+             "INSERT INTO custom_admin_report (value, created_at, updated_at) VALUES (%s, %s, %s)",
+             [json_str, created_at, created_at ]
+        )
+        connection.commit() 
     # Create the HTTP response with the CSV file
+    report_csv = report_df.to_csv(index=False)
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="report.csv"'
     response.write(report_csv)

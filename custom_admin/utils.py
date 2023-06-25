@@ -184,7 +184,4 @@ def generate_ticket_report():
 
     # Concatenate the report DataFrame with the total row
     report_df = pd.concat([report_df, total_row])
-
-    # Convert the DataFrame to a CSV string
-    report_csv = report_df.to_csv(index=False)
-    return report_csv
+    return report_df

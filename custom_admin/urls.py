@@ -10,5 +10,5 @@ urlpatterns = [
     path('create_allowance/', views.create_allowance, name='create_allowance'),
     path('new_admin_feedback/', views.new_admin_feedback,
          name='new_admin_feedback'),
-    path('return_csv_report/', views.return_csv_report, name='return_csv_report'),
+    path('return_csv_report/', views.return_ticket_csv_report, name='return_csv_report'),
 ]
