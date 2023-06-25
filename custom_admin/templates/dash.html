@@ -1,5 +1,6 @@
 {% extends 'base.html' %} 
 {% block content %}
+
 <main class="container">
   <h1>Allowances</h1>
   <ul>
@@ -68,7 +69,7 @@
 
     {% endfor %}
   </ul>
-  <hr/>
+  <hr />
   <h5>New Destination</h5>
   <li class="a_item no_style">
     <small>From</small>
@@ -85,22 +86,92 @@
   </li>
   <form class="a_item" method="POST" action="{% url 'create_allowance'%}">
     {% csrf_token %}
-    <input type="text" name="from_location" class="number_input" />
-    <input type="text" name="destination" class="number_input" />
-    <input type="date" name="depart_date" class="number_input" />
-    <input type="date" name="arriving_date" class="number_input" />
-    <input type="number" name="economy_seats" class="number_input" />
-    <input type="number" name="first_class_seats" class="number_input" />
-    <input type="number" name="business_class_seats" class="number_input" />
-    <input type="number" name="economy_seat_price" class="number_input" />
-    <input type="number" name="first_class_seat_price" class="number_input" />
+    <input required type="text" name="from_location" class="number_input" />
+    <input required type="text" name="destination" class="number_input" />
+    <input required type="date" name="depart_date" class="number_input" />
+    <input required type="date" name="arriving_date" class="number_input" />
+    <input required type="number" name="economy_seats" class="number_input" />
     <input
+      required
+      type="number"
+      name="first_class_seats"
+      class="number_input"
+    />
+    <input
+      required
+      type="number"
+      name="business_class_seats"
+      class="number_input"
+    />
+    <input
+      required
+      type="number"
+      name="economy_seat_price"
+      class="number_input"
+    />
+    <input
+      required
+      type="number"
+      name="first_class_seat_price"
+      class="number_input"
+    />
+    <input
+      required
       type="number"
       name="business_class_seat_price"
       class="number_input"
     />
     <button>CREATE</button>
   </form>
+
+  <hr />
+  <h1>Tickets</h1>
+  {% for ticket in tickets %}
+  <section class="ticket_wrapper">
+    <div class="ticket_header">
+      <h5>Ticket Id: {{ticket.id}}</h5>
+      <button
+        onclick="toggle_ticket_content(this)"
+        data-ticketid="{{ticket.id}}"
+      >
+        View Feedback
+      </button>
+    </div>
+    <div class="ticket_content d-none" id="ticket_{{ticket.id}}">
+      <ul class="feed_wrapper">
+        {% for feed in ticket.feedbacks %}
+        <li>
+          <div>
+            <strong>
+              {% if feed.email %} Client {% else %} Admin: {% endif %}
+            </strong>
+            <strong>: {{feed.title}}</strong>
+            <small style="margin-left: auto">{{feed.created_at}}</small>
+          </div>
+          {{feed.description}}
+        </li>
+        {% endfor %}
+      </ul>
+      <form
+        method="POST"
+        action="{% url 'new_admin_feedback'%}"
+        class="f_new_w"
+      >
+      {% csrf_token %}
+      <input type="hidden" name="ticket_id" value="{{ticket.id}}" />
+        <div>
+          <label for="f_title">Title</label>
+          <input type="text" name="title" id="f_title" required />
+        </div>
+        <div>
+          <label for="f_t_text">Description</label>
+          <input type="text" name="description" id="f_t_text" required />
+        </div>
+        <button>Send</button>
+      </form>
+    </div>
+  </section>
+  {% endfor %}
 </main>
 <style>
   .container {
@@ -120,5 +191,58 @@
   .number_input {
     max-width: 100px;
   }
+  .d-none {
+    display: none;
+  }
+  .ticket_wrapper {
+    box-shadow: 0px 0px 10px grey;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    max-width: 400px;
+  }
+  .ticket_header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid grey;
+  }
+  .ticket_content {
+    height: 150px;
+  }
+  .feed_wrapper {
+    height: calc(100% - 65px);
+    overflow-y: auto;
+  }
+  .f_new_w div input {
+    width: 100px;
+  }
+  .f_new_w button {
+    height: 30px !important;
+    width: 70px;
+    border-radius: 5px;
+  }
+  .f_new_w div {
+    display: flex;
+    flex-direction: column;
+  }
+  .f_new_w {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
 </style>
+<script>
+  function toggle_ticket_content(e) {
+    const id = Number(e.getAttribute("data-ticketid"));
+    const ticketTags = document.querySelectorAll(".ticket_content");
+
+    for (let ticket of ticketTags) {
+      console.log(ticket);
+      ticket.classList.remove("d-none");
+      ticket.classList.add("d-none");
+    }
+
+    document.getElementById(`ticket_${id}`).classList.remove("d-none");
+  }
+</script>
 {% endblock %}

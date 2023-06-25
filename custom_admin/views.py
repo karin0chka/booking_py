@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from .utils import check_if_admin, return_allowances
+from .utils import check_if_admin, return_allowances, get_tickets_with_feedbacks_and_allowance
 from django .db import connection
 from datetime import datetime
 
@@ -20,13 +20,6 @@ def login_view(request):
         return render(request, 'login.html')
 
 
-@login_required(login_url="login/")
-def dashboard_view(request):
-    check_if_admin(request)
-    context = {'allowances': []}
-    context['allowances'] = return_allowances()
-
-    return render(request, 'dash.html', context)
 
 
 @login_required(login_url="login/")
@@ -57,6 +50,14 @@ def update_allowance(request):
             connection.commit()
         return redirect('custom_admin')
 
+@login_required(login_url="login/")
+def dashboard_view(request):
+    check_if_admin(request)
+    context = {'allowances': [],'tickets':[]}
+    context['allowances'] = return_allowances()
+    context['tickets'] = get_tickets_with_feedbacks_and_allowance()
+
+    return render(request, 'dash.html', context)
 
 @login_required(login_url="login/")
 def create_allowance(request):
@@ -83,3 +84,25 @@ def create_allowance(request):
             # Remember to commit the transaction
             connection.commit()
         return redirect('custom_admin')
+    
+@login_required(login_url="login/")
+def new_admin_feedback(request):
+    check_if_admin(request)
+    if request.method == "POST":
+        created_at= datetime.now()
+        ticket_id=request.POST.get('ticket_id')
+        title=request.POST.get('title')
+        description=request.POST.get('description')
+
+        print('HEREREREREERRERER')
+        print(ticket_id, title,description)
+        print('HEREREREREERRERER')
+        with connection.cursor() as cursor:
+            cursor.execute(
+                 "INSERT INTO main_feedback (ticket_id, title, description, created_at, updated_at) VALUES (%s, %s, %s, %s, %s)",
+                 [ticket_id, title, description, created_at, created_at ]
+            )
+            connection.commit()
+        return redirect('custom_admin')
+
+    
