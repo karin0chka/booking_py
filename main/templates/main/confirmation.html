@@ -4,10 +4,10 @@
 
 
 {% if error %}
-<h2 style="color: tomato">{{error}}</h2>
+<h2 style="color: tomato; background-color:white; padding:10px 20px;">{{error}}</h2>
 {% else %}
 <main class="confirmation">
-  <h1>Booking Confirmed</h1>
+  <h1 >Booking Confirmed</h1>
   <section class="booking_inform">
     <div class="info">
       <h5><strong>Booking ID: </strong>{{ticket.booking_id}}</h5>
@@ -20,7 +20,7 @@
     </div>
     <div class="info">
     {% if ticket.discount_applied %}
-    <h5>Discount applied!</h5>
+    <h4 style="color: green; font-weight:600">Discount applied!</h4>
       {% else %}
       <form method="POST" action="/discount/" >
       {% csrf_token %}

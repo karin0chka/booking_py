@@ -1,6 +1,7 @@
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 from django .db import connection
+import pandas as pd
 
 
 
@@ -11,6 +12,26 @@ def check_if_admin(request):
         return redirect('/custom_admin/login')
      
  #Using raw  SQL insted of ORM to fetch all the allowences and put it in the dictionary
+def return_tickets():
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT * FROM main_ticket")
+        rows = cursor.fetchall()
+        # Process the query results
+        tickets = []
+        for row in rows:
+            # Create a dictionary or an object to represent the ticket
+            ticket = {
+                'id':row[0],
+                'quantity':row[1],
+                'ticket_type':row[2],
+                'canceled_by':row[3],
+                'booking_id':row[4],
+                'total_price':row[5],
+                'created_at':row[6],
+                'updated_at':row[7],
+            }
+            tickets.append(ticket)
+        return tickets
 
 def return_allowances():
     with connection.cursor() as cursor:
@@ -128,3 +149,42 @@ def get_tickets_with_feedbacks_and_allowance():
                 ticket_dict[ticket_id]['feedbacks'].append(feedback)
 
     return tickets
+
+def generate_ticket_report():
+    # Retrieve the ticket data
+    tickets = return_tickets()
+    # Convert the data into a Pandas DataFrame
+    df = pd.DataFrame.from_records(tickets)
+
+    # Calculate the number of tickets booked per type
+    tickets_per_type = df.groupby('ticket_type')['quantity'].sum()
+
+    # Calculate the total number of tickets booked
+    total_tickets = df['quantity'].sum()
+
+    # Calculate the income made per ticket type
+    income_per_type = df.groupby('ticket_type')['total_price'].sum()
+
+    # Calculate the total income made
+    total_income = df['total_price'].sum()
+
+    # Create a new DataFrame for the report
+    report_df = pd.DataFrame({
+        'Ticket Type': tickets_per_type.index,
+        'Tickets Booked': tickets_per_type.values,
+        'Income': income_per_type.values
+    })
+
+    # Calculate the total row for the report
+    total_row = pd.DataFrame({
+        'Ticket Type': 'Total',
+        'Tickets Booked': total_tickets,
+        'Income': total_income
+    }, index=[0])
+
+    # Concatenate the report DataFrame with the total row
+    report_df = pd.concat([report_df, total_row])
+
+    # Convert the DataFrame to a CSV string
+    report_csv = report_df.to_csv(index=False)
+    return report_csv

@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from .utils import check_if_admin, return_allowances, get_tickets_with_feedbacks_and_allowance
+from .utils import check_if_admin, return_allowances, get_tickets_with_feedbacks_and_allowance, generate_ticket_report
 from django .db import connection
 from datetime import datetime
 
@@ -85,6 +86,7 @@ def create_allowance(request):
             connection.commit()
         return redirect('custom_admin')
     
+
 @login_required(login_url="login/")
 def new_admin_feedback(request):
     check_if_admin(request)
@@ -94,9 +96,6 @@ def new_admin_feedback(request):
         title=request.POST.get('title')
         description=request.POST.get('description')
 
-        print('HEREREREREERRERER')
-        print(ticket_id, title,description)
-        print('HEREREREREERRERER')
         with connection.cursor() as cursor:
             cursor.execute(
                  "INSERT INTO main_feedback (ticket_id, title, description, created_at, updated_at) VALUES (%s, %s, %s, %s, %s)",
@@ -104,5 +103,14 @@ def new_admin_feedback(request):
             )
             connection.commit()
         return redirect('custom_admin')
+    
 
+def return_csv_report(request):
+    check_if_admin(request)
+    report_csv = generate_ticket_report()     
+    # Create the HTTP response with the CSV file
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="report.csv"'
+    response.write(report_csv)
+    return response
     

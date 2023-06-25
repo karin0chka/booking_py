@@ -126,8 +126,10 @@
 
   <hr />
   <h1>Tickets</h1>
+  <main class="ticket_section">
+  <section>
   {% for ticket in tickets %}
-  <section class="ticket_wrapper">
+  <article class="ticket_wrapper">
     <div class="ticket_header">
       <h5>Ticket Id: {{ticket.id}}</h5>
       <button
@@ -170,8 +172,15 @@
         <button>Send</button>
       </form>
     </div>
-  </section>
+  </article>
   {% endfor %}
+  </section>
+  <section>
+    <form method='GET' action="{% url 'return_csv_report' %}">
+    <button>Download CSV Report of All Tickets</button>
+    </form>
+  </section>
+  </main>
 </main>
 <style>
   .container {
@@ -193,6 +202,10 @@
   }
   .d-none {
     display: none;
+  }
+  .ticket_section{
+    display:grid;
+    grid-template-columns:1fr 1fr;
   }
   .ticket_wrapper {
     box-shadow: 0px 0px 10px grey;
