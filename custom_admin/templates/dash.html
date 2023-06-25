@@ -1,0 +1,124 @@
+{% extends 'base.html' %} 
+{% block content %}
+<main class="container">
+  <h1>Allowances</h1>
+  <ul>
+    <li class="a_item no_style">
+      <small>From</small>
+      <small>Destination</small>
+      <small>Depart date</small>
+      <small>Arriving date</small>
+      <small>Economy seats</small>
+      <small>First seats</small>
+      <small>Business seats</small>
+      <small>Economy price</small>
+      <small>First price</small>
+      <small>Business prise</small>
+      <small>Action</small>
+    </li>
+    {% for allowance in allowances %}
+    <li>
+      <form class="a_item" method="POST" action="{% url 'update_allowance'%}">
+        {% csrf_token %}
+
+        <strong>{{allowance.from_location}}</strong>
+        <strong>{{allowance.destination}}</strong>
+        <strong>{{allowance.depart_date}}</strong>
+        <strong>{{allowance.arriving_date}}</strong>
+        <input type="hidden" name="allowance_id" value="{{allowance.id}}" />
+        <input
+          type="number"
+          name="economy_seats"
+          value="{{allowance.economy_seats}}"
+          class="number_input"
+        />
+        <input
+          type="number"
+          name="first_class_seats"
+          value="{{allowance.first_class_seats}}"
+          class="number_input"
+        />
+        <input
+          type="number"
+          name="business_class_seats"
+          value="{{allowance.business_class_seats}}"
+          class="number_input"
+        />
+        <input
+          type="number"
+          name="economy_seat_price"
+          value="{{allowance.economy_seat_price}}"
+          class="number_input"
+        />
+        <input
+          type="number"
+          name="first_class_seat_price"
+          value="{{allowance.first_class_seat_price}}"
+          class="number_input"
+        />
+        <input
+          type="number"
+          name="business_class_seat_price"
+          value="{{allowance.business_class_seat_price}}"
+          class="number_input"
+        />
+        <button>Update</button>
+      </form>
+    </li>
+
+    {% endfor %}
+  </ul>
+  <hr/>
+  <h5>New Destination</h5>
+  <li class="a_item no_style">
+    <small>From</small>
+    <small>Destination</small>
+    <small>Depart date</small>
+    <small>Arriving date</small>
+    <small>Economy seats</small>
+    <small>First seats</small>
+    <small>Business seats</small>
+    <small>Economy price</small>
+    <small>First price</small>
+    <small>Business prise</small>
+    <small>Action</small>
+  </li>
+  <form class="a_item" method="POST" action="{% url 'create_allowance'%}">
+    {% csrf_token %}
+    <input type="text" name="from_location" class="number_input" />
+    <input type="text" name="destination" class="number_input" />
+    <input type="date" name="depart_date" class="number_input" />
+    <input type="date" name="arriving_date" class="number_input" />
+    <input type="number" name="economy_seats" class="number_input" />
+    <input type="number" name="first_class_seats" class="number_input" />
+    <input type="number" name="business_class_seats" class="number_input" />
+    <input type="number" name="economy_seat_price" class="number_input" />
+    <input type="number" name="first_class_seat_price" class="number_input" />
+    <input
+      type="number"
+      name="business_class_seat_price"
+      class="number_input"
+    />
+    <button>CREATE</button>
+  </form>
+</main>
+<style>
+  .container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-radius: 5px;
+    width: min(100%, 1400px);
+    background: white;
+  }
+  .a_item {
+    display: grid;
+    grid-template-columns: auto auto auto auto 100px 100px 100px 100px 100px 100px 80px;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .number_input {
+    max-width: 100px;
+  }
+</style>
+{% endblock %}

@@ -36,7 +36,7 @@ class Ticket(models.Model):
     # for comfort when I am assigning value from this table
     CANCELED_BY =(
         ('client','Client'),
-        ('admin','Admin')
+        ('none', 'None')
     )
     allowance=models.ForeignKey(Allowance, on_delete=models.CASCADE,null=True,blank=True)
     discount_applied=models.BooleanField(default=False)

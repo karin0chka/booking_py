@@ -62,6 +62,18 @@ def home(request):
     else:
         today= date.today().isoformat()
         return render(request, 'main/home.html',{'today':today})
+    
+
+def search(request):
+    from_location=request.GET.get('from_location')
+    destination=request.GET.get('destination')
+    depart_date=request.GET.get('depart_date')
+    quantity=request.GET.get('quantity')
+    ticket_type=request.GET.get('ticket_type')
+
+
+
+
 
 #displaying a booked ticket 
 def booked_ticket(request, booking_id):
@@ -186,27 +198,36 @@ def newTicket(request):
             #If is not available,
             print('NOPE',is_available)
             return HttpResponse("Not available!")
-                
+#his function is responsible for handling a discount request.              
 def discount(request):
+     #if the HTTP method is POST, the discount code and booking ID are extracted from the request.
     try:
+        # Retrieve discount code and booking ID from the request
         if request.method=='POST':
             code = request.POST.get('code')
             booking_id=request.POST.get('booking_id')
-
+            
+            # # Find the ticket in the database that matches the booking ID and has no discount applied
             ticket=Ticket.objects.select_related('allowance').get(booking_id=booking_id,discount_applied=False)
-           
+           # Find the discount in the database that matches the code and the associated allowance of the ticket
             discount=Discount.objects.get(code=code, allowance_id=ticket.allowance.id)
 
+            # Apply the discount to the ticket's total price
             ticket.discount_applied= True
             ticket.total_price= (ticket.total_price * (100 - discount.value)) / 100
+            # Save the updated ticket in the database
             ticket.save()
+            # Redirect the user to the ticket page for the updated ticket
             return redirect('/ticket/'+ ticket.booking_id)
         else:
+            # Render a confirmation page with an error message for invalid request (if not a POST request)
             return render('main/confirmation.html', {'error':'Invalid request'})              
 
     except Exception as e:
         print(e)
+        # Fetch the ticket again (without considering discount_applied flag) in case of an error
         ticket = Ticket.objects.select_related('allowance').get(booking_id=booking_id)
+        # Render a confirmation page with an error message and the ticket information
         return render(request, 'main/confirmation.html', {'error':'Invalid request','ticket':ticket})              
         
     
