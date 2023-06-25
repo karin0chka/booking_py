@@ -131,10 +131,15 @@
   {% for ticket in tickets %}
   <article class="ticket_wrapper">
     <div class="ticket_header">
-      <h5>Ticket Id: {{ticket.id}}</h5>
+    <div style="display:flex;flex-direction:column;">
+      <span>Booking ID: <strong> {{ticket.booking_id}}</strong></span>
+      <span>Total Price: <strong> {{ticket.total_price}}</strong></span>
+      <span>Ticket Type: <strong> {{ticket.ticket_type}}</strong></span>
+    </div>
       <button
         onclick="toggle_ticket_content(this)"
         data-ticketid="{{ticket.id}}"
+        class="view_feedB"
       >
         View Feedback
       </button>
@@ -213,6 +218,10 @@
     padding: 10px;
     margin-bottom: 10px;
     max-width: 400px;
+  }
+  .view_feedB{
+    height:55px;
+    borde-radius:5px;
   }
   .ticket_header {
     display: flex;
