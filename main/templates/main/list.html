@@ -1,11 +1,14 @@
 {% extends 'main/base.html' %} 
-{% load custom_filters %}
+{% load custom_filters %} 
 {% block content %} 
+
+
+
 {% if allowances %}
 <section class="ticket_result">
   <h1>Search Results</h1>
 
-  {% for allowance in allowances%}
+  {% for allowance in allowances %}
   <div class="ticket_wrapper">
     <div class="ticket_info">
       <div class="ticket_section">
@@ -29,27 +32,36 @@
           {% endif %}
         </h5>
       </div>
-      <div class="price_button" data-id="{{allowance.id}}" onclick="showConfirmButtons(this)">
+      <div
+        class="price_button"
+        data-id="{{allowance.id}}"
+        onclick="showConfirmButtons(this)"
+      >
         <h3>
-          £ 
-        {% if type == 'economy' %}
-              {{allowance.economy_seat_price|multiply:quantity}}
-        {% elif type == 'first_class' %} 
-              {{allowance.first_class_seat_price|multiply:quantity}} 
-        {% else %} 
-              {{allowance.business_class_seat_price|multiply:quantity}}
-         {% endif %}
+          £ {% if type == 'economy' %}
+          {{allowance.economy_seat_price|multiply:quantity}} 
+          {% elif type == 'first_class' %}
+          {{allowance.first_class_seat_price|multiply:quantity}} 
+          {% else %}
+          {{allowance.business_class_seat_price|multiply:quantity}} 
+          {% endif %}
         </h3>
         <h2>Buy</h2>
       </div>
     </div>
     <div class="ticket_booking" id="confirm{{allowance.id}}">
-      <div>
-            <button class="book_ticket" data-ticket-type="{{type}}" data-quantity="{{quantity}}" data-allowance-id="{{allowance.id}}" onclick="bookTicket(this)">Book ticket</button>
+      <div class='d-flex justify-center'>
+        <button class="return_ticket">Close</button>
       </div>
-      <div>
-            <button class="return_ticket">Сancel booking</button>
-      </div>
+      <form method="POST" action="{% url 'book_new_ticket' %}" class='w-100 d-flex justify-content-center align-items-center'>
+        {% csrf_token %}
+        <input type="hidden" name="ticket_type" value="{{type}}" />
+        <input type="hidden" name="quantity" value="{{quantity}}" />
+        <input type="hidden" name="allowance_id" value="{{allowance.id}}" />
+       <label for="b_email">Your Email: </label>
+        <input required type="email" name="email" id='b_email' />
+        <button class="book_ticket">Book ticket</button>
+      </form>
     </div>
   </div>
   {% endfor %} 
@@ -71,7 +83,7 @@
     opacity: 0.8;
   }
   .ticket_wrapper {
-    margin-top:10px;
+    margin-top: 10px;
     background-color: rgb(160, 201, 187);
     border: 1px solid rgb(43, 42, 42);
     width: 100%;
@@ -93,7 +105,7 @@
     flex-direction: column;
     cursor: pointer;
     user-select: none;
-    border-radius: 0px 0px 0px 30px ;
+    border-radius: 0px 0px 0px 30px;
   }
   .ticket_section {
     display: flex;
@@ -101,68 +113,41 @@
     justify-content: center;
     text-transform: capitalize;
   }
-  .ticket_booking{
+  .ticket_booking {
     display: none;
     width: 50%;
     margin: 0 auto;
   }
-  
-  .book_ticket{ 
+
+  .book_ticket {
     float: right;
     background-color: rgb(40, 125, 40);
     margin: 10px;
   }
-  .return_ticket{
+  .return_ticket {
     float: left;
     background-color: rgb(175, 24, 24);
     margin: 10px;
   }
-  @media (max-width: 769px){
-    .book_ticket, .return_ticket{
-        float: none;
+  @media (max-width: 769px) {
+    .book_ticket,
+    .return_ticket {
+      float: none;
     }
-    
-}
-.d-block{
-  display:block;
-}
+  }
+  .d-show {
+    width:100%;
+    display: grid;
+    grid-template-columns:1fr 1fr;
+
+  }
 </style>
 <script>
-    function showConfirmButtons(e){
-      
-        const id = Number(e.getAttribute("data-id"));
-        document.getElementById('confirm'+id).classList.toggle("d-block")
-    }
-
-
-
-    function bookTicket(e) {
-    const allowance_id = Number(e.getAttribute("data-allowance-id"));
-    const quantity = Number(e.getAttribute("data-quantity"));
-    const ticket_type=e.getAttribute("data-ticket-type");
-    if (typeof allowance_id !== "number") return;
-
-
-    const dto = {
-      allowance_id:allowance_id, 
-      quantity:quantity, 
-      ticket_type:ticket_type
-    };
-
-    fetch("/newticket/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": "{{ csrf_token }}",
-      },
-      body: JSON.stringify(dto),
-    }).then(res =>res.json())
-    .then((res) => {
-     if(res.url){
-      window.location.href = res.url
-     }  
- });
+  function showConfirmButtons(e) {
+    const id = Number(e.getAttribute("data-id"));
+    document.getElementById("confirm" + id).classList.toggle("d-show");
   }
+
 </script>
 
 {% endblock%}

@@ -17,4 +17,8 @@ def generate_random_string(length):
 
 
 def send_new_email(subject, message, from_email, recipient_list):
-    send_mail(subject, message, from_email, recipient_list)
+    try:
+        send_mail(subject, message, from_email, recipient_list)
+    except Exception as e:
+        print(e)
+        return False
