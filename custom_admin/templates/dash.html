@@ -1,4 +1,6 @@
 {% extends 'base.html' %} 
+{% load get_filters %}
+
 {% block content %}
 
 <main class="container">
@@ -181,9 +183,36 @@
   {% endfor %}
   </section>
   <section>
-    <form method='GET' action="{% url 'return_csv_report' %}">
-    <button>Download CSV Report of All Tickets</button>
-    </form>
+    <div class="d-flex justify-content-between">
+      <form method='GET' action="{% url 'return_csv_report' %}">
+      <button>Generate Report of All Tickets</button>
+      </form>
+      <form method='GET' action="{% url 'return_all_report' %}">
+      <button>Download Report Information</button>
+      </form>
+    </div>
+    <h3 style='margin-top:20px'>Ticket Generated Reports</h3>
+    <div class='report_wrapper'>
+    {% for report in reports %}
+    <div style='margin-bottom:20px'>
+     <span> Generated at: <strong>{{report.created_at}}</strong></span>
+      <table>
+      <tr>
+        <th>Income</th>
+        <th>Ticket Type</th>
+        <th>Ticket Booked</th>
+      </tr>
+      {% for value in report.value %}
+      <tr>
+        <td>{{ value.Income }}</td>
+        <td>{{ value|dict_value:'Ticket Type' }}</td>
+        <td>{{ value|dict_value:'Ticket Booked' }}</td>
+      </tr>
+      {% endfor %}
+      </table>
+    </div>
+    {% endfor %}
+    </div>
   </section>
   </main>
 </main>
@@ -252,6 +281,21 @@
     align-items: flex-end;
     justify-content: space-between;
   }
+  table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
 </style>
 <script>
   function toggle_ticket_content(e) {

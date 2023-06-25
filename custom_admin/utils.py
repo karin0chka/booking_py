@@ -1,17 +1,23 @@
 from django.shortcuts import redirect
 from django.contrib.auth import logout
+from django.db.models import Count
+from django.db import models
 from django .db import connection
+from .models import Report
+from main.models import Allowance, Ticket, Feedback
+
 import pandas as pd
 
 
-
 def check_if_admin(request):
-     
-     if not request.user.is_superuser:
+
+    if not request.user.is_superuser:
         logout(request)
         return redirect('/custom_admin/login')
-     
- #Using raw  SQL insted of ORM to fetch all the allowences and put it in the dictionary
+
+ # Using raw  SQL insted of ORM to fetch all the allowences and put it in the dictionary
+
+
 def return_tickets():
     with connection.cursor() as cursor:
         cursor.execute("SELECT * FROM main_ticket")
@@ -21,17 +27,18 @@ def return_tickets():
         for row in rows:
             # Create a dictionary or an object to represent the ticket
             ticket = {
-                'id':row[0],
-                'quantity':row[1],
-                'ticket_type':row[2],
-                'canceled_by':row[3],
-                'booking_id':row[4],
-                'total_price':row[5],
-                'created_at':row[6],
-                'updated_at':row[7],
+                'id': row[0],
+                'quantity': row[1],
+                'ticket_type': row[2],
+                'canceled_by': row[3],
+                'booking_id': row[4],
+                'total_price': row[5],
+                'created_at': row[6],
+                'updated_at': row[7],
             }
             tickets.append(ticket)
         return tickets
+
 
 def return_allowances():
     with connection.cursor() as cursor:
@@ -42,20 +49,21 @@ def return_allowances():
         for row in rows:
             # Create a dictionary or an object to represent the allowance
             allowance = {
-                'id':row[0],
-                'from_location':row[1],
-                'destination':row[2],
-                'depart_date':row[3],
-                'arriving_date':row[4],
-                'economy_seats':row[5],
-                'first_class_seats':row[6],
-                'business_class_seats':row[7],
-                'economy_seat_price':row[8],
-                'first_class_seat_price':row[9],
-                'business_class_seat_price':row[10],
+                'id': row[0],
+                'from_location': row[1],
+                'destination': row[2],
+                'depart_date': row[3],
+                'arriving_date': row[4],
+                'economy_seats': row[5],
+                'first_class_seats': row[6],
+                'business_class_seats': row[7],
+                'economy_seat_price': row[8],
+                'first_class_seat_price': row[9],
+                'business_class_seat_price': row[10],
             }
             allowances.append(allowance)
         return allowances
+
 
 def get_tickets_with_feedbacks_and_allowance():
     with connection.cursor() as cursor:
@@ -134,7 +142,7 @@ def get_tickets_with_feedbacks_and_allowance():
                 }
                 ticket_dict[ticket_id] = ticket
                 tickets.append(ticket)
-            
+
             feedback_id = row[21]
             if feedback_id:
                 # Create a new feedback object and add it to the corresponding ticket
@@ -149,6 +157,7 @@ def get_tickets_with_feedbacks_and_allowance():
                 ticket_dict[ticket_id]['feedbacks'].append(feedback)
 
     return tickets
+
 
 def generate_ticket_report():
     # Retrieve the ticket data
@@ -184,4 +193,29 @@ def generate_ticket_report():
 
     # Concatenate the report DataFrame with the total row
     report_df = pd.concat([report_df, total_row])
+    return report_df
+
+
+def generate_report_of_report():
+    # Retrieve data from the tables
+    allowances = Allowance.objects.all()
+    # Prepare the data for the report
+    report_data = []
+    for allowance in allowances:
+        tickets = Ticket.objects.select_related('allowance').filter(allowance_id=allowance.id)
+        feedbacks = Feedback.objects.filter(ticket__allowance_id=allowance.id).values('ticket_id').annotate(feedback_count=Count('ticket_id'))
+
+        allowance_data = {
+            'From Location': allowance.from_location,
+            'Destination': allowance.destination,
+            'Economy Seats Remaining': allowance.economy_seats - sum(ticket.quantity for ticket in tickets if ticket.ticket_type == 'econom'),
+            'First Class Seats Remaining': allowance.first_class_seats - sum(ticket.quantity for ticket in tickets if ticket.ticket_type == 'first'),
+            'Business Class Seats Remaining': allowance.business_class_seats - sum(ticket.quantity for ticket in tickets if ticket.ticket_type == 'business'),
+            'Total Booked Tickets': sum(ticket.quantity for ticket in tickets),
+            'Total Price of Booked Tickets': sum(ticket.total_price for ticket in tickets),
+            'Feedback Count': next((feedback['feedback_count'] for feedback in feedbacks if feedback['ticket_id'] == allowance.id), 0)
+        }
+        report_data.append(allowance_data)
+        
+    report_df = pd.DataFrame(report_data)
     return report_df

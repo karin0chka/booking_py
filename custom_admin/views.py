@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from .utils import check_if_admin, return_allowances, get_tickets_with_feedbacks_and_allowance, generate_ticket_report
+from .utils import check_if_admin, return_allowances, get_tickets_with_feedbacks_and_allowance, generate_ticket_report, generate_report_of_report
 from django .db import connection
 from datetime import datetime
+from .models import Report
 import json
 
 
@@ -55,10 +56,10 @@ def update_allowance(request):
 @login_required(login_url="login/")
 def dashboard_view(request):
     check_if_admin(request)
-    context = {'allowances': [],'tickets':[]}
+    context = {'allowances': [], 'tickets':[], 'reports':[]}
     context['allowances'] = return_allowances()
     context['tickets'] = get_tickets_with_feedbacks_and_allowance()
-
+    context['reports'] = Report.objects.all()
     return render(request, 'dash.html', context)
 
 @login_required(login_url="login/")
@@ -106,6 +107,7 @@ def new_admin_feedback(request):
         return redirect('custom_admin')
     
 
+@login_required(login_url="login/")
 def return_ticket_csv_report(request):
     check_if_admin(request)
     report_df = generate_ticket_report() 
@@ -125,3 +127,17 @@ def return_ticket_csv_report(request):
     response.write(report_csv)
     return response
     
+@login_required(login_url="login/")
+def return_all_report(request):
+    check_if_admin(request)
+    report_df=generate_report_of_report()
+    json_str = report_df.to_dict(orient='records')
+    print(json_str)
+
+    report_csv = report_df.to_csv(index=False)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="report.csv"'
+    response.write(report_csv)
+    return response
+
+

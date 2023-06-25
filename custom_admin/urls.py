@@ -11,4 +11,5 @@ urlpatterns = [
     path('new_admin_feedback/', views.new_admin_feedback,
          name='new_admin_feedback'),
     path('return_csv_report/', views.return_ticket_csv_report, name='return_csv_report'),
+    path('return_all_report/', views.return_all_report, name='return_all_report'),
 ]
