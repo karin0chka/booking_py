@@ -59,7 +59,7 @@ def dashboard_view(request):
     context = {'allowances': [], 'tickets':[], 'reports':[]}
     context['allowances'] = return_allowances()
     context['tickets'] = get_tickets_with_feedbacks_and_allowance()
-    context['reports'] = Report.objects.all()
+    context['reports'] = Report.objects.all().order_by('created_at')
     return render(request, 'dash.html', context)
 
 @login_required(login_url="login/")
