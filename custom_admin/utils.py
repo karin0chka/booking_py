@@ -150,7 +150,7 @@ def get_tickets_with_feedbacks_and_allowance():
 
     return tickets
 
-def generate_report():
+def generate_ticket_report():
     # Retrieve the ticket data
     tickets = return_tickets()
     # Convert the data into a Pandas DataFrame
@@ -187,7 +187,4 @@ def generate_report():
 
     # Convert the DataFrame to a CSV string
     report_csv = report_df.to_csv(index=False)
-
-
-
     return report_csv

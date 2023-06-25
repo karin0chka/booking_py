@@ -64,17 +64,6 @@ def home(request):
         return render(request, 'main/home.html',{'today':today})
     
 
-def search(request):
-    from_location=request.GET.get('from_location')
-    destination=request.GET.get('destination')
-    depart_date=request.GET.get('depart_date')
-    quantity=request.GET.get('quantity')
-    ticket_type=request.GET.get('ticket_type')
-
-
-
-
-
 #displaying a booked ticket 
 def booked_ticket(request, booking_id):
     #retrieving(Cross-Site-Request Forgery);
@@ -143,7 +132,6 @@ def feedback(request, booking_id):
 #handles the creation of new ticket based on the data fron request
 def newTicket(request):
     #'POST'-user has submitted a form;t()
-    print("qwe")
     if request.method=='POST':
         #Retrieve JSON data from the request body;
         json_data = json.loads(request.body)
