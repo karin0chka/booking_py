@@ -71,21 +71,22 @@ def create_allowance(request):
         destination = request.POST.get('destination')
         depart_date = request.POST.get('depart_date')
         arriving_date = request.POST.get('arriving_date')
-        economy_seats = request.POST.get('economy_seats')
-        first_class_seats = request.POST.get('first_class_seats')
-        business_class_seats = request.POST.get('business_class_seats')
-        economy_seat_price = request.POST.get('economy_seat_price')
-        first_class_seat_price = request.POST.get('first_class_seat_price')
-        business_class_seat_price = request.POST.get(
-            'business_class_seat_price')
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO main_allowance (from_location, destination, depart_date, arriving_date, economy_seats, first_class_seats, business_class_seats, economy_seat_price, first_class_seat_price, business_class_seat_price, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s )",
-                [from_location, destination, depart_date, arriving_date, economy_seats, first_class_seats,
-                    business_class_seats, economy_seat_price, first_class_seat_price, business_class_seat_price, created_at, created_at]
-            )
-            # Remember to commit the transaction
-            connection.commit()
+        economy_seats = int(request.POST.get('economy_seats'))
+        first_class_seats = int(request.POST.get('first_class_seats'))
+        business_class_seats = int(request.POST.get('business_class_seats'))
+        economy_seat_price = int(request.POST.get('economy_seat_price'))
+        first_class_seat_price = int(request.POST.get('first_class_seat_price'))
+        business_class_seat_price = int(request.POST.get('business_class_seat_price'))
+        if from_location and destination and depart_date and arriving_date and economy_seats > 0 and first_class_seats > 0 and business_class_seats > 0 and economy_seat_price > 0 and first_class_seat_price > 0 and business_class_seat_price > 0:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "INSERT INTO main_allowance (from_location, destination, depart_date, arriving_date, economy_seats, first_class_seats, business_class_seats, economy_seat_price, first_class_seat_price, business_class_seat_price, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s )",
+                    [from_location, destination, depart_date, arriving_date, economy_seats, first_class_seats,
+                        business_class_seats, economy_seat_price, first_class_seat_price, business_class_seat_price, created_at, created_at]
+                )
+                connection.commit()
+
+                # Remember to commit the transaction
         return redirect('custom_admin')
     
 

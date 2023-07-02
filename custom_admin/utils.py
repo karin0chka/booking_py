@@ -158,6 +158,21 @@ def get_tickets_with_feedbacks_and_allowance():
 
     return tickets
 
+    """
+   The function generate_ticket_report() generates a report based on the ticket data.
+    1. Retrieves the ticket data using the return_tickets() function.
+    2. Converts the ticket data into a Pandas DataFrame.
+    3. Calculates the number of tickets booked per type by grouping the DataFrame by 'ticket_type' and summing the 'quantity' column.
+    4. Calculates the total number of tickets booked by summing the 'quantity' column.
+    5. Calculates the income made per ticket type by grouping the DataFrame by 'ticket_type' and summing the 'total_price' column.
+    6. Calculates the total income made by summing the 'total_price' column.
+    7. Creates a new DataFrame for the report with columns 'Ticket Type', 'Tickets Booked', and 'Income' using the calculated values.
+    8. Calculates the total row for the report by creating a new DataFrame with a single row containing the values 'Total', total_tickets, and total_income.
+    9. Concatenates the report DataFrame with the total row to include the total information in the report.
+    10. Returns the final report DataFrame.
+    """
+
+
 
 def generate_ticket_report():
     # Retrieve the ticket data
@@ -181,7 +196,7 @@ def generate_ticket_report():
     report_df = pd.DataFrame({
         'Ticket Type': tickets_per_type.index,
         'Tickets Booked': tickets_per_type.values,
-        'Income': income_per_type.values
+        'Income': income_per_type.values,
     })
 
     # Calculate the total row for the report

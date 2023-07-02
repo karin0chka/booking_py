@@ -40,7 +40,7 @@
         <h3>
           £ {% if type == 'economy' %}
           {{allowance.economy_seat_price|multiply:quantity}} 
-          {% elif type == 'first_class' %}
+         {% elif type == 'first_class' %}
           {{allowance.first_class_seat_price|multiply:quantity}} 
           {% else %}
           {{allowance.business_class_seat_price|multiply:quantity}} 

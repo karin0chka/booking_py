@@ -1,3 +1,4 @@
+from multiprocessing import connection
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .forms import FeedbackForm, TicketSearchForm
@@ -15,41 +16,40 @@ from .utils import generate_random_string, send_new_email
 
 def home(request):
     if (request.POST):
+        from_location = request.POST.get('from_location').lower()
+        destination = request.POST.get('destination').lower()
+        ticket_type = request.POST.get('ticket_type')
+        quantity = int(request.POST.get('quantity'))
+
         # checks if the  request method is POST, indicating that a form has been submitted;
         # get()- to retrieve the cleaned form data and assigns it to 'form';
-        formDto = TicketSearchForm(request.POST)
-        form = formDto.get()
 
         # checks if the form is valid;
         # if it is extracts the values;
 
-        if formDto.is_valid():
-            type_value = form['ticket_type']
-            search_value = form['quantity']
-
+        if from_location and destination and ticket_type and quantity > 0:
             query = Q()
-            if type_value == 'economy':
-                query = Q(economy_seats__gte=search_value)
-            elif type_value == 'first_class':
-                query = Q(first_class_seats__gte=search_value)
+            if ticket_type == 'economy':
+                query = Q(economy_seats__gte=quantity)
+            elif ticket_type == 'first_class':
+                query = Q(first_class_seats__gte=quantity)
             else:
-                query = Q(business_class_seats__gte=search_value)
+                query = Q(business_class_seats__gte=quantity)
 
         # filter allowance
             allowances = Allowance.objects.filter(
                 query,
-                from_location=form['from_location'],
-                destination=form['destination'],
+                from_location=from_location,
+                destination=destination,
             )
             # if the form is valid, creates 'context' dictionary;
             context = {
-                'type': type_value,
+                'type':  ticket_type,
                 'allowances': allowances,
-                'form': form,
-                'quantity': search_value,
-
-
+                'form': from_location,
+                'quantity': quantity,
             }
+            print(quantity)
             return render(request, 'main/list.html', context)
         # if form is not valid return 'Not valid!'
         else:
@@ -187,10 +187,10 @@ def newTicket(request):
             subject = 'New Ticket'
             message = 'Your new ticket is booked. \n\n' + 'Booking ID: ' + booking_id + '\n\n' + 'Total Price: ' + \
                 str(total_price) + 'To view your ticket follow the link: ' + \
-                'http://127.0.0.1:8000/ticket'+ booking_id
+                'http://127.0.0.1:8000/ticket' + booking_id
             from_email = 'no-reply@bookticket.com'
             recipient_list = [email]
-            print( subject, message, from_email, recipient_list)
+            print(subject, message, from_email, recipient_list)
             # send_new_email(subject, message, from_email, recipient_list)
             return redirect('/ticket/' + booking_id)
         else:

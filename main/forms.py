@@ -21,9 +21,7 @@ class TicketSearchForm(forms.Form):
 
     #'is_valid()'return True regardless of whether the form is valid or not
 
-    def is_valid(self) -> bool:
-        valid = super().is_valid()
-        return True
+
     #get() returns on clened data using 'self.cleaned_data' otherwise 'None'
     
     def get(self):
